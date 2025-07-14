@@ -1,3 +1,24 @@
+Repositorio Final para GitHub
+A continuación, te presento el README.md principal y luego el contenido de cada script, ya listo para copiar y pegar en los archivos correspondientes dentro de tu estructura de carpetas.
+
+1. Estructura de Carpetas y Archivos
+Para organizar tu repositorio, sigue esta estructura:
+
+linux-escalada-privilegios/
+├── .gitignore
+├── LICENSE
+├── README.md
+├── lab1_suid_path/
+│   ├── 00_setup_lab.sh
+│   ├── 01_exploit.sh
+│   ├── 02_verify_exploit.sh
+│   └── 03_revert_fix.sh
+└── lab2_insecure_cron/
+    ├── 00_setup_lab.sh
+    ├── 01_exploit.sh
+    ├── 02_verify_exploit.sh
+    └── 03_revert_fix.sh
+
 # Laboratorios de Escalada de Privilegios en Linux
 
 
