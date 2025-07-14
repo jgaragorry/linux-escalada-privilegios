@@ -150,5 +150,116 @@ Una tarea programada (cron job) está configurada para ejecutarse periódicament
 * lab2_insecure_cron/02_verify_exploit.sh: Verifica si se obtuvieron privilegios de root (comprobando SUID en /bin/bash).
 * lab2_insecure_cron/03_revert_fix.sh: Revierte los cambios y demuestra el hardening.
 
-Ejecución del Laboratorio Paso a Paso
+### Ejecución del Laboratorio Paso a Paso
 Navega al directorio del laboratorio:
+
+```Bash
+
+cd lab2_insecure_cron
+```
+### Configurar el Entorno Vulnerable:
+
+* Propósito: Este script creará un directorio con permisos 777, colocará un script de ejemplo dentro y configurará una tarea cron de root para ejecutar este script cada minuto.
+* Ejecutar como: Tu usuario no-root, usando sudo.
+
+```Bash
+
+sudo ./00_setup_lab.sh
+```
+* Salida Esperada: Mensajes de confirmación sobre la creación del directorio (con permisos rwxrwxrwx), la configuración del script y la adición de la tarea cron.
+* Ejecutar el Ataque:
+* Propósito: Este script verificará los permisos de escritura y luego modificará el script de la tarea cron. El payload inyectado establecerá el bit SUID en /bin/bash cuando la tarea cron se ejecute como root.
+
+### Ejecutar como: Tu usuario no-root.
+
+```Bash
+
+./01_exploit.sh
+```
+* Salida Esperada: Mensajes que confirman el acceso de escritura y la modificación del script. Te indicará esperar hasta 60 segundos para que la tarea cron ejecute el payload.
+
+### Verificar la Explotación:
+
+* Propósito: Después de esperar, este script comprueba si /bin/bash ahora tiene el bit SUID. Si es así, intentará proporcionarte una shell de root.
+* Ejecutar como: Tu usuario no-root.
+
+```Bash
+
+./02_verify_exploit.sh
+```
+* Salida Esperada: Debería confirmar que /bin/bash tiene el bit SUID. ¡Deberías obtener un nuevo prompt de shell, indicando que eres root! Usa id para verificar, luego exit para volver a tu usuario no-root.
+* Revertir Cambios y Aprender Hardening:
+* Propósito: Este script eliminará el bit SUID de /bin/bash, eliminará la tarea cron de root, limpiará el directorio vulnerable y explicará los principios de hardening.
+* Ejecutar como: Tu usuario no-root, usando sudo.
+
+```Bash
+
+sudo ./03_revert_fix.sh
+```
+### Salida Esperada: Confirmación de que los cambios se han revertido y un resumen de las medidas de hardening.
+
+### Vulnerabilidad y Hardening
+Vulnerabilidad:
+
+Permisos de archivo/directorio inseguros: Un directorio o script propiedad de root (o utilizado por una tarea cron de root) tiene permisos de escritura globales (777 o similar), lo que permite que cualquier usuario lo modifique.
+
+Tarea cron de root: Una tarea programada para ejecutarse como root proporciona una ventana de oportunidad para la escalada de privilegios si el script ejecutado está comprometido.
+
+Medidas de Hardening:
+
+Permisos Estrictos de Archivos y Directorios: Los directorios o scripts utilizados por las tareas cron de root NO deben ser escribibles por usuarios no privilegiados. Usa chmod 755 (o más estricto) y asegúrate de que root sea el propietario.
+
+Rutas Absolutas en Crontabs: Siempre especifica la ruta completa a los ejecutables en las tareas cron (ej. /usr/bin/php, /bin/bash).
+
+Principio del Menor Privilegio: Las tareas cron deben ejecutarse con los privilegios más bajos posibles requeridos. Si un trabajo no necesita root, ejecútalo como un usuario con menos privilegios.
+
+Auditorías regulares de Tareas Cron: Revisa periódicamente la crontab de root (sudo crontab -l) y /etc/crontab en busca de entradas sospechosas o mal configuradas.
+
+Contribuciones
+¡Siéntete libre de abrir issues o pull requests si tienes sugerencias para mejoras, nuevos laboratorios o encuentras algún error!
+
+Licencia
+Este proyecto es de código abierto y está disponible bajo la Licencia MIT.
+
+
+### 3. Contenido de los Scripts y Archivos Auxiliares
+
+**`.gitignore`**
+
+Ignorar archivos compilados de C
+*.o
+a.out
+
+Ignorar directorios de laboratorio creados por los scripts (si no se eliminan)
+/opt/vulnerable_app_suid/
+/opt/insecure_cron_scripts/
+
+Ignorar archivos temporales generados por scripts
+*.tmp
+.log
+/tmp/_path_suid/ # para el directorio malicioso del lab 1
+
+
+**`LICENSE`**
+
+MIT License
+
+Copyright (c) 2025 [Tu Nombre o el Nombre de tu Organización]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
