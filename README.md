@@ -140,17 +140,15 @@ Vulnerabilidad:
 ## 3. Laboratorio 2: Explotación de Tarea Cron Insegura
 Este laboratorio demuestra cómo los permisos de archivo laxos combinados con una tarea cron de root pueden llevar a la escalada de privilegios.
 
-Descripción de la Vulnerabilidad
+### Descripción de la Vulnerabilidad
 Una tarea programada (cron job) está configurada para ejecutarse periódicamente como root. El script o comando que ejecuta esta tarea reside en un directorio con permisos de escritura globales (por ejemplo, chmod 777). Un atacante, como usuario con pocos privilegios, puede modificar este script para insertar comandos maliciosos. Cuando se ejecuta la tarea cron, ejecutará los comandos maliciosos del atacante con privilegios de root.
 
-Archivos del Laboratorio
-lab2_insecure_cron/00_setup_lab.sh: Configura el directorio con permisos de escritura globales y la tarea cron de root.
+## Archivos del Laboratorio
 
-lab2_insecure_cron/01_exploit.sh: Modifica el script cron con un payload.
-
-lab2_insecure_cron/02_verify_exploit.sh: Verifica si se obtuvieron privilegios de root (comprobando SUID en /bin/bash).
-
-lab2_insecure_cron/03_revert_fix.sh: Revierte los cambios y demuestra el hardening.
+* lab2_insecure_cron/00_setup_lab.sh: Configura el directorio con permisos de escritura globales y la tarea cron de root.
+* lab2_insecure_cron/01_exploit.sh: Modifica el script cron con un payload.
+* lab2_insecure_cron/02_verify_exploit.sh: Verifica si se obtuvieron privilegios de root (comprobando SUID en /bin/bash).
+* lab2_insecure_cron/03_revert_fix.sh: Revierte los cambios y demuestra el hardening.
 
 Ejecución del Laboratorio Paso a Paso
 Navega al directorio del laboratorio:
