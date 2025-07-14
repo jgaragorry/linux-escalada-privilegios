@@ -56,6 +56,7 @@ Una vez que tu entorno Ubuntu esté listo y hayas iniciado sesión como tu **usu
 ```bash
 git clone [https://github.com/tu-nombre-de-usuario/linux-escalada-privilegios.git](https://github.com/tu-nombre-de-usuario/linux-escalada-privilegios.git)
 cd linux-escalada-privilegios
+```
 
 (Nota: Recuerda reemplazar tu-nombre-de-usuario con tu nombre de usuario real de GitHub una vez que hayas creado el repositorio y subido los archivos.)
 
