@@ -94,24 +94,26 @@ sudo ./00_setup_lab.sh
 
 ### 2. Ejecutar el Ataque:
 
-Propósito: Este script creará un ls malicioso en un directorio temporal, lo agregará a tu PATH y luego ejecutará el programa vulnerable SUID.
+ * Propósito: Este script creará un ls malicioso en un directorio temporal, lo agregará a tu PATH y luego ejecutará el programa vulnerable SUID.
 
-Ejecutar como: Tu usuario no-root.
+ * Ejecutar como: Tu usuario no-root.
 
-Bash
+```Bash
 
 ./01_exploit.sh
+```
 Salida Esperada: El script primero ejecutará el programa vulnerable, mostrará su salida normal, luego preparará el ls malicioso, y finalmente, ejecutará el programa vulnerable de nuevo. ¡Deberías obtener un nuevo prompt de shell, indicando que eres root!
 
-Verificar la Explotación:
+### Verificar la Explotación:
 
 Propósito: Después de obtener la shell de root en el paso anterior, este script confirmará tu ID de usuario actual.
 
 Ejecutar como: root (dentro de la shell de root recién obtenida).
 
-Bash
+```Bash
 
 ./02_verify_exploit.sh
+```
 Salida Esperada: Un mensaje de éxito claro que indica UID=0(root). Para salir de la shell de root, simplemente escribe exit.
 
 Revertir Cambios y Aprender Hardening:
@@ -120,19 +122,20 @@ Propósito: Este script eliminará el programa vulnerable, limpiará los archivo
 
 Ejecutar como: Tu usuario no-root, usando sudo.
 
-Bash
+```Bash
 
 sudo ./03_revert_fix.sh
+```
 Salida Esperada: Confirmación de que el entorno vulnerable ha sido limpiado y un resumen de los principios de hardening.
 
-Vulnerabilidad y Hardening
+### Vulnerabilidad y Hardening
 Vulnerabilidad:
 
 SUID mal configurado: Un programa con privilegios elevados (SUID root) llama a comandos externos sin especificar rutas absolutas.
 
 Manipulación de variables de entorno: La variable PATH puede ser controlada por un atacante para inyectar ejecutables maliciosos.
 
-Medidas de Hardening:
+### Medidas de Hardening:
 
 Usar siempre Rutas Absolutas: En programas SUID, utiliza siempre la ruta completa para comandos externos (ej. /bin/ls en lugar de ls).
 
