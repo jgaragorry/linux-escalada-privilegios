@@ -78,3 +78,294 @@ Una vez que tu entorno Ubuntu esté listo y hayas iniciado sesión como tu **usu
 ```bash
 git clone [https://github.com/tu-nombre-de-usuario/linux-escalada-privilegios.git](https://github.com/tu-nombre-de-usuario/linux-escalada-privilegios.git)
 cd linux-escalada-privilegios
+
+
+(Nota: Recuerda reemplazar tu-nombre-de-usuario con tu nombre de usuario real de GitHub una vez que hayas creado el repositorio y subido los archivos.)
+
+2. Laboratorio 1: Explotación de Binario SUID (Inyección de PATH)
+Este laboratorio demuestra cómo un binario SUID mal configurado puede llevar a privilegios de root mediante la manipulación de variables de entorno.
+
+Descripción de la Vulnerabilidad
+Un binario propiedad de root tiene el bit SUID (Set User ID) habilitado, lo que le permite ejecutarse con privilegios de root. Fundamentalmente, este binario ejecuta comandos externos (como ls) sin especificar su ruta absoluta (por ejemplo, system("ls -la /root") en lugar de system("/bin/ls -la /root")). Un atacante puede explotar esto manipulando su variable de entorno PATH para que incluya un directorio controlado por él. Al colocar un "falso" ls malicioso en este directorio, el binario SUID ejecutará el ls del atacante como root en lugar del legítimo.
+
+Archivos del Laboratorio
+lab1_suid_path/00_setup_lab.sh: Configura el programa SUID vulnerable.
+
+lab1_suid_path/01_exploit.sh: Ejecuta el ataque de inyección de PATH.
+
+lab1_suid_path/02_verify_exploit.sh: Verifica si se obtuvieron privilegios de root.
+
+lab1_suid_path/03_revert_fix.sh: Revierte los cambios y demuestra el hardening.
+
+Ejecución del Laboratorio Paso a Paso
+Navega al directorio del laboratorio:
+
+Bash
+
+cd lab1_suid_path
+Configurar el Entorno Vulnerable:
+
+Propósito: Este script compilará un pequeño programa en C, lo hará propiedad de root y establecerá su bit SUID.
+
+Ejecutar como: Tu usuario no-root, usando sudo.
+
+Bash
+
+sudo ./00_setup_lab.sh
+Salida Esperada: Mensajes de confirmación sobre la creación del directorio, la compilación y la configuración exitosa del bit SUID (verás una s en rws en los permisos del archivo).
+
+Ejecutar el Ataque:
+
+Propósito: Este script creará un ls malicioso en un directorio temporal, lo agregará a tu PATH y luego ejecutará el programa vulnerable SUID.
+
+Ejecutar como: Tu usuario no-root.
+
+Bash
+
+./01_exploit.sh
+Salida Esperada: El script primero ejecutará el programa vulnerable, mostrará su salida normal, luego preparará el ls malicioso, y finalmente, ejecutará el programa vulnerable de nuevo. ¡Deberías obtener un nuevo prompt de shell, indicando que eres root!
+
+Verificar la Explotación:
+
+Propósito: Después de obtener la shell de root en el paso anterior, este script confirmará tu ID de usuario actual.
+
+Ejecutar como: root (dentro de la shell de root recién obtenida).
+
+Bash
+
+./02_verify_exploit.sh
+Salida Esperada: Un mensaje de éxito claro que indica UID=0(root). Para salir de la shell de root, simplemente escribe exit.
+
+Revertir Cambios y Aprender Hardening:
+
+Propósito: Este script eliminará el programa vulnerable, limpiará los archivos maliciosos y explicará cómo prevenir este tipo de ataque.
+
+Ejecutar como: Tu usuario no-root, usando sudo.
+
+Bash
+
+sudo ./03_revert_fix.sh
+Salida Esperada: Confirmación de que el entorno vulnerable ha sido limpiado y un resumen de los principios de hardening.
+
+Vulnerabilidad y Hardening
+Vulnerabilidad:
+
+SUID mal configurado: Un programa con privilegios elevados (SUID root) llama a comandos externos sin especificar rutas absolutas.
+
+Manipulación de variables de entorno: La variable PATH puede ser controlada por un atacante para inyectar ejecutables maliciosos.
+
+Medidas de Hardening:
+
+Usar siempre Rutas Absolutas: En programas SUID, utiliza siempre la ruta completa para comandos externos (ej. /bin/ls en lugar de ls).
+
+Sanear Variables de Entorno: Los programas SUID deben limpiar o establecer explícitamente variables de entorno críticas (PATH, LD_PRELOAD, etc.) a valores seguros conocidos.
+
+Principio del Menor Privilegio: Solo otorga SUID si es absolutamente esencial. Reevalúa si una tarea puede realizarse con privilegios más bajos.
+
+Auditorías regulares de SUID: Revisa periódicamente tu sistema en busca de binarios SUID con sudo find / -type f -perm /4000 2>/dev/null y elimina el SUID de binarios innecesarios o riesgosos.
+
+3. Laboratorio 2: Explotación de Tarea Cron Insegura
+Este laboratorio demuestra cómo los permisos de archivo laxos combinados con una tarea cron de root pueden llevar a la escalada de privilegios.
+
+Descripción de la Vulnerabilidad
+Una tarea programada (cron job) está configurada para ejecutarse periódicamente como root. El script o comando que ejecuta esta tarea reside en un directorio con permisos de escritura globales (por ejemplo, chmod 777). Un atacante, como usuario con pocos privilegios, puede modificar este script para insertar comandos maliciosos. Cuando se ejecuta la tarea cron, ejecutará los comandos maliciosos del atacante con privilegios de root.
+
+Archivos del Laboratorio
+lab2_insecure_cron/00_setup_lab.sh: Configura el directorio con permisos de escritura globales y la tarea cron de root.
+
+lab2_insecure_cron/01_exploit.sh: Modifica el script cron con un payload.
+
+lab2_insecure_cron/02_verify_exploit.sh: Verifica si se obtuvieron privilegios de root (comprobando SUID en /bin/bash).
+
+lab2_insecure_cron/03_revert_fix.sh: Revierte los cambios y demuestra el hardening.
+
+Ejecución del Laboratorio Paso a Paso
+Navega al directorio del laboratorio:
+
+Bash
+
+cd lab2_insecure_cron
+Configurar el Entorno Vulnerable:
+
+Propósito: Este script creará un directorio con permisos 777, colocará un script de ejemplo dentro y configurará una tarea cron de root para ejecutar este script cada minuto.
+
+Ejecutar como: Tu usuario no-root, usando sudo.
+
+Bash
+
+sudo ./00_setup_lab.sh
+Salida Esperada: Mensajes de confirmación sobre la creación del directorio (con permisos rwxrwxrwx), la configuración del script y la adición de la tarea cron.
+
+Ejecutar el Ataque:
+
+Propósito: Este script verificará los permisos de escritura y luego modificará el script de la tarea cron. El payload inyectado establecerá el bit SUID en /bin/bash cuando la tarea cron se ejecute como root.
+
+Ejecutar como: Tu usuario no-root.
+
+Bash
+
+./01_exploit.sh
+Salida Esperada: Mensajes que confirman el acceso de escritura y la modificación del script. Te indicará esperar hasta 60 segundos para que la tarea cron ejecute el payload.
+
+Verificar la Explotación:
+
+Propósito: Después de esperar, este script comprueba si /bin/bash ahora tiene el bit SUID. Si es así, intentará proporcionarte una shell de root.
+
+Ejecutar como: Tu usuario no-root.
+
+Bash
+
+./02_verify_exploit.sh
+Salida Esperada: Debería confirmar que /bin/bash tiene el bit SUID. ¡Deberías obtener un nuevo prompt de shell, indicando que eres root! Usa id para verificar, luego exit para volver a tu usuario no-root.
+
+Revertir Cambios y Aprender Hardening:
+
+Propósito: Este script eliminará el bit SUID de /bin/bash, eliminará la tarea cron de root, limpiará el directorio vulnerable y explicará los principios de hardening.
+
+Ejecutar como: Tu usuario no-root, usando sudo.
+
+Bash
+
+sudo ./03_revert_fix.sh
+Salida Esperada: Confirmación de que los cambios se han revertido y un resumen de las medidas de hardening.
+
+Vulnerabilidad y Hardening
+Vulnerabilidad:
+
+Permisos de archivo/directorio inseguros: Un directorio o script propiedad de root (o utilizado por una tarea cron de root) tiene permisos de escritura globales (777 o similar), lo que permite que cualquier usuario lo modifique.
+
+Tarea cron de root: Una tarea programada para ejecutarse como root proporciona una ventana de oportunidad para la escalada de privilegios si el script ejecutado está comprometido.
+
+Medidas de Hardening:
+
+Permisos Estrictos de Archivos y Directorios: Los directorios o scripts utilizados por las tareas cron de root NO deben ser escribibles por usuarios no privilegiados. Usa chmod 755 (o más estricto) y asegúrate de que root sea el propietario.
+
+Rutas Absolutas en Crontabs: Siempre especifica la ruta completa a los ejecutables en las tareas cron (ej. /usr/bin/php, /bin/bash).
+
+Principio del Menor Privilegio: Las tareas cron deben ejecutarse con los privilegios más bajos posibles requeridos. Si un trabajo no necesita root, ejecútalo como un usuario con menos privilegios.
+
+Auditorías regulares de Tareas Cron: Revisa periódicamente la crontab de root (sudo crontab -l) y /etc/crontab en busca de entradas sospechosas o mal configuradas.
+
+Contribuciones
+¡Siéntete libre de abrir issues o pull requests si tienes sugerencias para mejoras, nuevos laboratorios o encuentras algún error!
+
+Licencia
+Este proyecto es de código abierto y está disponible bajo la Licencia MIT.
+
+
+### 3. Contenido de los Scripts y Archivos Auxiliares
+
+**`.gitignore`**
+
+Ignorar archivos compilados de C
+*.o
+a.out
+
+Ignorar directorios de laboratorio creados por los scripts (si no se eliminan)
+/opt/vulnerable_app_suid/
+/opt/insecure_cron_scripts/
+
+Ignorar archivos temporales generados por scripts
+*.tmp
+.log
+/tmp/_path_suid/ # para el directorio malicioso del lab 1
+
+
+**`LICENSE`**
+
+MIT License
+
+Copyright (c) 2025 [Tu Nombre o el Nombre de tu Organización]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+**`lab1_suid_path/00_setup_lab.sh`**
+
+```bash
+#!/bin/bash
+# 00_setup_lab.sh - Script para configurar el entorno SUID vulnerable
+# Este script DEBE ejecutarse con sudo.
+
+echo "--- Iniciando configuración del laboratorio SUID vulnerable ---"
+
+# --- Paso 1: Instalar dependencias si es necesario ---
+echo "[1/5] Actualizando el sistema e instalando build-essential (para gcc)..."
+sudo apt update -y > /dev/null 2>&1
+sudo apt install -y build-essential > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "ERROR: Falló la instalación de build-essential. ¿Estás conectado a internet?"
+    exit 1
+fi
+echo "    Dependencias instaladas."
+
+# --- Paso 2: Crear el directorio vulnerable ---
+VULN_DIR="/opt/vulnerable_app_suid"
+echo "[2/5] Creando el directorio vulnerable: $VULN_DIR"
+sudo mkdir -p "$VULN_DIR"
+sudo chown root:root "$VULN_DIR"
+sudo chmod 755 "$VULN_DIR" # Permisos estándar para el directorio
+echo "    Directorio creado y con permisos correctos."
+
+# --- Paso 3: Crear el código fuente del programa SUID vulnerable ---
+VULN_C_FILE="$VULN_DIR/vulnerable_program.c"
+echo "[3/5] Creando el código fuente del programa vulnerable en $VULN_C_FILE"
+sudo tee "$VULN_C_FILE" > /dev/null <<EOF
+#include <stdio.h>
+#include <stdlib.h> // Para system()
+#include <unistd.h> // Para getuid()
+
+int main() {
+    printf("[PROGRAMA VULNERABLE]: ¡Hola desde el programa SUID!\n");
+    printf("[PROGRAMA VULNERABLE]: Mi UID efectivo es: %d\n", geteuid());
+    // La vulnerabilidad: llama a 'ls' sin ruta absoluta.
+    // Esto permite que el atacante inyecte su propio 'ls'.
+    printf("[PROGRAMA VULNERABLE]: Intentando ejecutar 'ls -la /root'...\n");
+    system("ls -la /root"); 
+    printf("[PROGRAMA VULNERABLE]: Ejecución de 'ls' terminada.\n");
+    return 0;
+}
+EOF
+echo "    Código fuente creado."
+
+# --- Paso 4: Compilar el programa ---
+VULN_BIN="$VULN_DIR/vulnerable_program"
+echo "[4/5] Compilando el programa vulnerable en $VULN_BIN"
+sudo gcc "$VULN_C_FILE" -o "$VULN_BIN"
+if [ $? -ne 0 ]; then
+    echo "ERROR: Falló la compilación del programa. Revisa el código fuente."
+    exit 1
+fi
+echo "    Programa compilado exitosamente."
+
+# --- Paso 5: Establecer la propiedad de root y el bit SUID ---
+echo "[5/5] Estableciendo propietario root y el bit SUID para $VULN_BIN"
+sudo chown root:root "$VULN_BIN"
+sudo chmod 4755 "$VULN_BIN" # u=rws (usuario leer, escribir, setuid), go=rx (grupo/otros leer, ejecutar)
+echo "    Permisos establecidos. Verificando..."
+ls -la "$VULN_BIN" | grep "rws"
+if [ $? -eq 0 ]; then
+    echo "    ¡Configuración SUID exitosa! La 's' en 'rws' lo confirma."
+else
+    echo "ERROR: El bit SUID no se estableció correctamente. Revisa los pasos."
+    exit 1
+fi
+
+echo "--- Configuración del laboratorio SUID vulnerable completada. ---"
+echo "Ahora, ejecuta './01_exploit.sh' como tu usuario normal para intentar la esca
