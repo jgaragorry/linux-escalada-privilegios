@@ -60,7 +60,7 @@ cd linux-escalada-privilegios
 
 (Nota: Recuerda reemplazar tu-nombre-de-usuario con tu nombre de usuario real de GitHub una vez que hayas creado el repositorio y subido los archivos.)
 
-2. Laboratorio 1: Explotación de Binario SUID (Inyección de PATH)
+## 2. Laboratorio 1: Explotación de Binario SUID (Inyección de PATH)
 Este laboratorio demuestra cómo un binario SUID mal configurado puede llevar a privilegios de root mediante la manipulación de variables de entorno.
 
 Descripción de la Vulnerabilidad
