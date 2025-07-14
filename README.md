@@ -79,7 +79,7 @@ Navega al directorio del laboratorio:
 cd lab1_suid_path
 ```
 
-### Configurar el Entorno Vulnerable:
+### 1. Configurar el Entorno Vulnerable:
 
  * Propósito: Este script compilará un pequeño programa en C, lo hará propiedad de root y establecerá su bit SUID.
 
@@ -89,3 +89,55 @@ cd lab1_suid_path
 
 sudo ./00_setup_lab.sh
 ```
+
+* Salida Esperada: Mensajes de confirmación sobre la creación del directorio, la compilación y la configuración exitosa del bit SUID (verás una s en rws en los permisos del archivo).
+
+### 2. Ejecutar el Ataque:
+
+Propósito: Este script creará un ls malicioso en un directorio temporal, lo agregará a tu PATH y luego ejecutará el programa vulnerable SUID.
+
+Ejecutar como: Tu usuario no-root.
+
+Bash
+
+./01_exploit.sh
+Salida Esperada: El script primero ejecutará el programa vulnerable, mostrará su salida normal, luego preparará el ls malicioso, y finalmente, ejecutará el programa vulnerable de nuevo. ¡Deberías obtener un nuevo prompt de shell, indicando que eres root!
+
+Verificar la Explotación:
+
+Propósito: Después de obtener la shell de root en el paso anterior, este script confirmará tu ID de usuario actual.
+
+Ejecutar como: root (dentro de la shell de root recién obtenida).
+
+Bash
+
+./02_verify_exploit.sh
+Salida Esperada: Un mensaje de éxito claro que indica UID=0(root). Para salir de la shell de root, simplemente escribe exit.
+
+Revertir Cambios y Aprender Hardening:
+
+Propósito: Este script eliminará el programa vulnerable, limpiará los archivos maliciosos y explicará cómo prevenir este tipo de ataque.
+
+Ejecutar como: Tu usuario no-root, usando sudo.
+
+Bash
+
+sudo ./03_revert_fix.sh
+Salida Esperada: Confirmación de que el entorno vulnerable ha sido limpiado y un resumen de los principios de hardening.
+
+Vulnerabilidad y Hardening
+Vulnerabilidad:
+
+SUID mal configurado: Un programa con privilegios elevados (SUID root) llama a comandos externos sin especificar rutas absolutas.
+
+Manipulación de variables de entorno: La variable PATH puede ser controlada por un atacante para inyectar ejecutables maliciosos.
+
+Medidas de Hardening:
+
+Usar siempre Rutas Absolutas: En programas SUID, utiliza siempre la ruta completa para comandos externos (ej. /bin/ls en lugar de ls).
+
+Sanear Variables de Entorno: Los programas SUID deben limpiar o establecer explícitamente variables de entorno críticas (PATH, LD_PRELOAD, etc.) a valores seguros conocidos.
+
+Principio del Menor Privilegio: Solo otorga SUID si es absolutamente esencial. Reevalúa si una tarea puede realizarse con privilegios más bajos.
+
+Auditorías regulares de SUID: Revisa periódicamente tu sistema en busca de binarios SUID con sudo find / -type f -perm /4000 2>/dev/null y elimina el SUID de binarios innecesarios o riesgosos.
