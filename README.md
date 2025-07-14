@@ -81,9 +81,9 @@ cd lab1_suid_path
 
 ### Configurar el Entorno Vulnerable:
 
-Propósito: Este script compilará un pequeño programa en C, lo hará propiedad de root y establecerá su bit SUID.
+ * Propósito: Este script compilará un pequeño programa en C, lo hará propiedad de root y establecerá su bit SUID.
 
-Ejecutar como: Tu usuario no-root, usando sudo.
+ * Ejecutar como: Tu usuario no-root, usando sudo.
 
 ```bash
 
