@@ -5,20 +5,7 @@ markdown
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/1200px-Tux.svg.png" alt="Logo de Linux" width="120"/>
 </p>
 
-Una colección práctica de laboratorios diseñada para enseñar técnicas fundamentales de escalada de privilegios local en Linux. Estos ejercicios están pensados para estudiantes de ciberseguridad, aspirantes a pentesters y entusiastas de la seguridad que buscan fortalecer sus habilidades en entornos reales.
-
----
-
-## 📦 ¿Qué Incluye Este Repositorio?
-
-Cada laboratorio contiene:
-
-- ✅ Una **descripción clara** de la vulnerabilidad.
-- 🧰 **Prerrequisitos** para configurar tu entorno de laboratorio.
-- ⚙️ **Scripts de configuración automática** para crear el escenario vulnerable.
-- 💣 **Scripts de explotación** para demostrar cómo funciona el ataque.
-- 🔍 **Scripts de verificación** para confirmar el éxito de la escalada de privilegios.
-- 🧹 **Scripts de reversión y hardening** para limpiar el laboratorio y aprender estrategias de mitigación.
+Este repositorio contiene laboratorios prácticos para aprender y practicar técnicas de escalada de privilegios en sistemas Linux. Ideal para estudiantes de ciberseguridad, pentesters y entusiastas del hardening.
 
 ---
 
@@ -40,36 +27,25 @@ linux-escalada-privilegios/
     ├── 02_verify_exploit.sh
     └── 03_revert_fix.sh
 📚 Tabla de Contenidos
-🔧 Prerrequisitos y Configuración del Laboratorio
+🔧 Prerrequisitos
 
-🧪 Laboratorio 1: Binario SUID con Inyección de PATH
+🧪 Laboratorio 1: Binario SUID con PATH inseguro
 
-⏰ Laboratorio 2: Tarea Cron Insegura
+⏰ Laboratorio 2: Tarea Cron insegura
 
 🤝 Contribuciones
 
 📄 Licencia
 
-🙌 Créditos
+1. 🔧 Prerrequisitos
+🖥️ Entorno Recomendado
+Ubuntu Server 24.04 LTS
 
-1. 🔧 Prerrequisitos y Configuración del Laboratorio
-Para ejecutar estos laboratorios con éxito, necesitarás un entorno Linux aislado.
+Usuario no-root (ej. estudiante)
 
-🖥️ Entorno Recomendado: Ubuntu Server 24.04 LTS
-Opción 1: WSL (Windows Subsystem for Linux)
-Abre la Microsoft Store y busca Ubuntu 24.04 LTS.
+Opcional: openssh-server para facilitar el acceso remoto
 
-Instálalo y crea un usuario no-root (ej. estudiante).
-
-Opción 2: Máquina Virtual
-Descarga la ISO de Ubuntu Server 24.04 LTS.
-
-Crea una VM con al menos 2GB RAM y 20GB de disco.
-
-Instala Ubuntu y crea un usuario no-root (estudiante).
-
-(Opcional) Instala openssh-server para facilitar el acceso remoto:
-
+🛠️ Instalación rápida en WSL
 bash
 sudo apt update
 sudo apt install -y openssh-server
@@ -77,69 +53,190 @@ sudo ufw allow ssh
 sudo ufw enable
 📥 Clonar el Repositorio
 bash
-git clone https://github.com/tu-nombre-de-usuario/linux-escalada-privilegios.git
+git clone https://github.com/jgaragorry/linux-escalada-privilegios.git
 cd linux-escalada-privilegios
-🔁 Reemplaza tu-nombre-de-usuario con tu nombre real de GitHub.
+2. 🧪 Laboratorio 1: Binario SUID con PATH inseguro
+🐞 Descripción
+Explota un binario con permisos SUID que invoca comandos sin rutas absolutas, permitiendo manipular el PATH.
 
-2. 🧪 Laboratorio 1: Binario SUID con Inyección de PATH
-🐞 Descripción de la Vulnerabilidad
-Este laboratorio explora cómo un binario con permisos SUID puede ser explotado si invoca comandos sin rutas absolutas, permitiendo al atacante manipular el PATH.
+📂 Archivos
+00_setup_lab.sh: Configura el entorno vulnerable
 
-📂 Archivos del Laboratorio
-00_setup_lab.sh: Configura el entorno vulnerable.
+01_exploit.sh: Ejecuta el exploit
 
-01_exploit.sh: Realiza la explotación.
+02_verify_exploit.sh: Verifica la escalada
 
-02_verify_exploit.sh: Verifica si se obtuvo privilegios elevados.
+03_revert_fix.sh: Limpia y aplica mitigaciones
 
-03_revert_fix.sh: Limpia y aplica mitigaciones.
-
-🚀 Ejecución Paso a Paso
+🚀 Ejecución
 bash
 cd lab1_suid_path
 bash 00_setup_lab.sh
 bash 01_exploit.sh
 bash 02_verify_exploit.sh
 bash 03_revert_fix.sh
-🛡️ Hardening
-Usar rutas absolutas en scripts.
+🛡️ Mitigación
+Usar rutas absolutas
 
-Evitar el uso de SUID innecesario.
+Evitar SUID innecesario
 
-Auditar binarios con permisos especiales.
+Auditar binarios con permisos especiales
 
-3. ⏰ Laboratorio 2: Tarea Cron Insegura
-🐞 Descripción de la Vulnerabilidad
-Este laboratorio demuestra cómo una tarea cron mal configurada puede ser manipulada para ejecutar código malicioso con privilegios elevados.
+3. ⏰ Laboratorio 2: Tarea Cron insegura
+🐞 Descripción
+Demuestra cómo una tarea cron mal configurada puede ser explotada para ejecutar código malicioso con privilegios elevados.
 
-📂 Archivos del Laboratorio
-00_setup_lab.sh: Crea la tarea cron vulnerable.
+📂 Archivos
+00_setup_lab.sh: Crea la tarea vulnerable
 
-01_exploit.sh: Inyecta el payload.
+01_exploit.sh: Inyecta el payload
 
-02_verify_exploit.sh: Verifica la escalada.
+02_verify_exploit.sh: Verifica la escalada
 
-03_revert_fix.sh: Elimina la tarea y aplica mitigaciones.
+03_revert_fix.sh: Elimina la tarea y aplica mitigaciones
 
-🚀 Ejecución Paso a Paso
+🚀 Ejecución
 bash
 cd lab2_insecure_cron
 bash 00_setup_lab.sh
 bash 01_exploit.sh
 bash 02_verify_exploit.sh
 bash 03_revert_fix.sh
-🛡️ Hardening
-Evitar tareas cron que ejecuten archivos en ubicaciones modificables por usuarios.
+🛡️ Mitigación
+Evitar cron jobs que ejecuten archivos en ubicaciones modificables
 
-Usar rutas seguras y permisos restrictivos.
+Usar rutas seguras y permisos restrictivos
 
-Auditar tareas programadas regularmente.
+Auditar tareas programadas regularmente
 
 4. 🤝 Contribuciones
-¡Las contribuciones son bienvenidas! Si tienes ideas para nuevos laboratorios o mejoras, abre un issue o envía un pull request.
+¿Tienes ideas para nuevos laboratorios o mejoras? ¡Abre un issue o envía un pull request!
 
 5. 📄 Licencia
 Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
 
-6. 🙌 Créditos
-Desarrollado con pasión por la seguridad en Linux. Inspirado por prácticas reales de pentesting y hardening.
+
+¿Quieres que te ayude a crear una versión en inglés, agregar una sección de preguntas frecuentes o generar una guía PDF para distribución académica? También puedo ayudarte a automatizar la ejecución de los laboratorios con un script maestro.
+la ideas es qeu yo puedoca copiarlo desd eel canva pero no creoq eue steen forato markdown
+¡Perfecto, Jose! Si lo que necesitas es poder copiar el contenido directamente desde aquí y pegarlo en tu archivo README.md dentro de GitHub o tu editor de texto, entonces aquí te lo presento en formato Markdown puro, sin ningún formato visual externo como Canva, y listo para que lo copies y lo pegues tal cual.
+
+✅ Versión Markdown lista para copiar
+markdown
+# 🛡️ Laboratorios de Escalada de Privilegios en Linux
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/1200px-Tux.svg.png" alt="Logo de Linux" width="120"/>
+</p>
+
+Este repositorio contiene laboratorios prácticos para aprender y practicar técnicas de escalada de privilegios en sistemas Linux. Ideal para estudiantes de ciberseguridad, pentesters y entusiastas del hardening.
+
+---
+
+## 📁 Estructura del Repositorio
+
+```bash
+linux-escalada-privilegios/
+├── .gitignore
+├── LICENSE
+├── README.md
+├── lab1_suid_path/
+│   ├── 00_setup_lab.sh
+│   ├── 01_exploit.sh
+│   ├── 02_verify_exploit.sh
+│   └── 03_revert_fix.sh
+└── lab2_insecure_cron/
+    ├── 00_setup_lab.sh
+    ├── 01_exploit.sh
+    ├── 02_verify_exploit.sh
+    └── 03_revert_fix.sh
+📚 Tabla de Contenidos
+🔧 Prerrequisitos
+
+🧪 Laboratorio 1: Binario SUID con PATH inseguro
+
+⏰ Laboratorio 2: Tarea Cron insegura
+
+🤝 Contribuciones
+
+📄 Licencia
+
+1. 🔧 Prerrequisitos
+🖥️ Entorno Recomendado
+Ubuntu Server 24.04 LTS
+
+Usuario no-root (ej. estudiante)
+
+Opcional: openssh-server para facilitar el acceso remoto
+
+🛠️ Instalación rápida en WSL
+bash
+sudo apt update
+sudo apt install -y openssh-server
+sudo ufw allow ssh
+sudo ufw enable
+📥 Clonar el Repositorio
+bash
+git clone https://github.com/jgaragorry/linux-escalada-privilegios.git
+cd linux-escalada-privilegios
+2. 🧪 Laboratorio 1: Binario SUID con PATH inseguro
+🐞 Descripción
+Explota un binario con permisos SUID que invoca comandos sin rutas absolutas, permitiendo manipular el PATH.
+
+📂 Archivos
+00_setup_lab.sh: Configura el entorno vulnerable
+
+01_exploit.sh: Ejecuta el exploit
+
+02_verify_exploit.sh: Verifica la escalada
+
+03_revert_fix.sh: Limpia y aplica mitigaciones
+
+🚀 Ejecución
+bash
+cd lab1_suid_path
+bash 00_setup_lab.sh
+bash 01_exploit.sh
+bash 02_verify_exploit.sh
+bash 03_revert_fix.sh
+🛡️ Mitigación
+Usar rutas absolutas
+
+Evitar SUID innecesario
+
+Auditar binarios con permisos especiales
+
+3. ⏰ Laboratorio 2: Tarea Cron insegura
+🐞 Descripción
+Demuestra cómo una tarea cron mal configurada puede ser explotada para ejecutar código malicioso con privilegios elevados.
+
+📂 Archivos
+00_setup_lab.sh: Crea la tarea vulnerable
+
+01_exploit.sh: Inyecta el payload
+
+02_verify_exploit.sh: Verifica la escalada
+
+03_revert_fix.sh: Elimina la tarea y aplica mitigaciones
+
+🚀 Ejecución
+bash
+cd lab2_insecure_cron
+bash 00_setup_lab.sh
+bash 01_exploit.sh
+bash 02_verify_exploit.sh
+bash 03_revert_fix.sh
+🛡️ Mitigación
+Evitar cron jobs que ejecuten archivos en ubicaciones modificables
+
+Usar rutas seguras y permisos restrictivos
+
+Auditar tareas programadas regularmente
+
+4. 🤝 Contribuciones
+¿Tienes ideas para nuevos laboratorios o mejoras? ¡Abre un issue o envía un pull request!
+
+5. 📄 Licencia
+Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+
+
+Este texto está en formato Markdown puro, compatible con GitHub. Puedes copiarlo directamente desde aquí y pegarlo en tu archivo `README.md` sin preocuparte por estilos externos. ¿Quieres que te ayude a crear una versión en inglés o agregar una sección de preguntas frecuentes (FAQ)?
