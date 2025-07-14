@@ -74,3 +74,17 @@ Un binario propiedad de root tiene el bit SUID (Set User ID) habilitado, lo que 
 
 Ejecución del Laboratorio Paso a Paso
 Navega al directorio del laboratorio:
+
+```bash
+
+cd lab1_suid_path
+Configurar el Entorno Vulnerable:
+```
+Propósito: Este script compilará un pequeño programa en C, lo hará propiedad de root y establecerá su bit SUID.
+
+Ejecutar como: Tu usuario no-root, usando sudo.
+
+```bash
+
+sudo ./00_setup_lab.sh
+```
