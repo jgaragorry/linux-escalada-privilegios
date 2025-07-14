@@ -56,3 +56,23 @@ Una vez que tu entorno Ubuntu esté listo y hayas iniciado sesión como tu **usu
 ```bash
 git clone [https://github.com/tu-nombre-de-usuario/linux-escalada-privilegios.git](https://github.com/tu-nombre-de-usuario/linux-escalada-privilegios.git)
 cd linux-escalada-privilegios
+
+(Nota: Recuerda reemplazar tu-nombre-de-usuario con tu nombre de usuario real de GitHub una vez que hayas creado el repositorio y subido los archivos.)
+
+2. Laboratorio 1: Explotación de Binario SUID (Inyección de PATH)
+Este laboratorio demuestra cómo un binario SUID mal configurado puede llevar a privilegios de root mediante la manipulación de variables de entorno.
+
+Descripción de la Vulnerabilidad
+Un binario propiedad de root tiene el bit SUID (Set User ID) habilitado, lo que le permite ejecutarse con privilegios de root. Fundamentalmente, este binario ejecuta comandos externos (como ls) sin especificar su ruta absoluta (por ejemplo, system("ls -la /root") en lugar de system("/bin/ls -la /root")). Un atacante puede explotar esto manipulando su variable de entorno PATH para que incluya un directorio controlado por él. Al colocar un "falso" ls malicioso en este directorio, el binario SUID ejecutará el ls del atacante como root en lugar del legítimo.
+
+Archivos del Laboratorio
+lab1_suid_path/00_setup_lab.sh: Configura el programa SUID vulnerable.
+
+lab1_suid_path/01_exploit.sh: Ejecuta el ataque de inyección de PATH.
+
+lab1_suid_path/02_verify_exploit.sh: Verifica si se obtuvieron privilegios de root.
+
+lab1_suid_path/03_revert_fix.sh: Revierte los cambios y demuestra el hardening.
+
+Ejecución del Laboratorio Paso a Paso
+Navega al directorio del laboratorio:
