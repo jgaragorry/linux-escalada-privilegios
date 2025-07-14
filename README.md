@@ -76,7 +76,6 @@ Ejecución del Laboratorio Paso a Paso
 Navega al directorio del laboratorio:
 
 ```bash
-
 cd lab1_suid_path
 ```
 
